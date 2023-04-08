@@ -17,10 +17,20 @@ public abstract class Task implements Frequency {
         this.description = description;
         this.type = type;
         this.dateTime = dateTime;
+
+        id = counter;
+        counter++;
     }
 
     public LocalDateTime getDateTime() {
         return dateTime;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public int getId() {
+        return id;
     }
 
     @Override

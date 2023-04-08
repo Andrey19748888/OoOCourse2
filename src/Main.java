@@ -1,7 +1,11 @@
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        Service service = new Service();
+
         try (Scanner scanner = new Scanner(System.in)) {
             label:
             while (true) {
@@ -11,13 +15,21 @@ public class Main {
                     int menu = scanner.nextInt();
                     switch (menu) {
                         case 1:
-                            inputTask(scanner);
+                            inputTask(scanner, service);
+                            service.printMap();
                             break;
                         case 2:
                             // todo: обрабатываем пункт меню 2
+                            System.out.println(" Какую задачу вы хотите удалить? Ведите id.");
+                            int id;
+                            id = scanner.nextInt();
+                            service.delete(id);
+                            service.printMap();
                             break;
                         case 3:
-                            // todo: обрабатываем пункт меню 3
+                            service.printMap();
+
+//                            getTodayTasks();
                             break;
                         case 0:
                             break label;
@@ -30,7 +42,22 @@ public class Main {
         }
     }
 
-    private static void inputTask(Scanner scanner) {
+
+    private static void getTodayTasks(Service service, LocalDate date) {
+
+        Task task;
+
+        for (int i = 1; i <= service.getMapSize(); i++) {
+            task = service.getTaskById(i);
+
+            if (task.getDateTime().toLocalDate().equals(date)) {
+                System.out.println(task.getName());
+            }
+
+        }
+    }
+
+    private static void inputTask(Scanner scanner, Service service) {
         System.out.println("Введите название задачи: ");
         String taskName = scanner.nextLine();
         System.out.println("Введите описание задачи: ");
@@ -40,12 +67,39 @@ public class Main {
         System.out.println("Задача одноразовая (1), еженедельная (2), ежемесячная (3) или ежегодная (4)?: ");
         String taskFrequency = scanner.nextLine();
 
-        System.out.println(taskName);
-        System.out.println(description);
-        System.out.println(taskType);
-        System.out.println(taskFrequency);
-        // todo
+        System.out.println("Когда нужно выполнить задачу в первый раз? Введите в формате: YYYY-MM-ddThh:mm:ss");
+        String dateTime = scanner.nextLine();
+
+        Type type = null;
+
+        if (taskType.equals(1)) {
+            type = Type.PERSONAL;
+        } else if ( taskType.equals(2) ){
+            type = Type.WORK;
+        }
+
+
+        Task task = null;
+
+        switch (taskFrequency) {
+            case "1":       // задача одноразовая
+                task = new SingleTask(taskName,description,type,LocalDateTime.parse(dateTime));
+                break;
+            case "2":       // задача еженедельная
+                task = new WeeklyTask(taskName,description,type,LocalDateTime.parse(dateTime));
+                break;
+            case "3":
+                task = new MonthlyTask(taskName,description,type,LocalDateTime.parse(dateTime));
+                break;
+            case "4":
+                task = new YearlyTask(taskName,description,type,LocalDateTime.parse(dateTime));
+                break;
+        }
+
+        service.add(task);  // [1,task1; 2,task2; 3,task3]
     }
+
+
 
     private static void printMenu() {
         System.out.println("1. Добавить задачу");
